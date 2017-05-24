@@ -12,7 +12,6 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.io.File;
@@ -21,8 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
-
-import static com.phoenix.xphotoview.Utils.rectMulti;
 
 /**
  * Created by zhenghui on 2017/5/19.
@@ -1070,7 +1067,7 @@ public class PhotoViewAttacher implements IViewAttacher{
         private Rect getShowBitmapUnit(int n, int m)
         {
             float bitmapRatio = mShowBitmapRect.height() * 1f / mImageRect.height();
-            RectF vRect = rectMulti(mViewRect, bitmapRatio);
+            RectF vRect = Utils.rectMulti(mViewRect, bitmapRatio);
 
             float vw = vRect.width();
             float vh = vRect.height();
@@ -1197,7 +1194,7 @@ public class PhotoViewAttacher implements IViewAttacher{
         {
             /**  计算图片压缩比然后将可视部分rect转换到原图坐标上*/
             float ratio = mImageRect.height() / mShowBitmapRect.height();
-            RectF vBRect = rectMulti(getVisibleShowBitmapRect(), ratio);
+            RectF vBRect = Utils.rectMulti(getVisibleShowBitmapRect(), ratio);
 
             /** 因为Grid是将原图以ViewRect切割，于是用 ViewRect 再次计算可见 Grid 坐标*/
             int sm = (int) ( vBRect.left / mViewRect.width());
