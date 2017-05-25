@@ -12,6 +12,7 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.io.File;
@@ -39,6 +40,8 @@ import java.util.UUID;
  */
 
 public class PhotoViewAttacher implements IViewAttacher{
+
+    private static final String TAG = "PhotoViewAttacher";
 
     private static final float MAX_SCALE_VALUE = 4;
     private static final float MIN_SCALE_VALUE = 1;
@@ -106,7 +109,7 @@ public class PhotoViewAttacher implements IViewAttacher{
      */
     private Handler mLoadingHandler = null;
     private final Handler mMainHandler = new Handler();
-    private final HandlerThread mLoadingThread;
+    private HandlerThread mLoadingThread;
     private static final String THREAD_TAG = "LoadingThread";
     private final Object mDecodeSyncLock = new Object();
 
@@ -169,15 +172,19 @@ public class PhotoViewAttacher implements IViewAttacher{
             mLoadingHandler.removeCallbacks(mBitmapGrid.mDecodeThumbRunnable);
         }
 
-        mLoadingThread.quit();
         if (mBmDecoder != null) {
             mBmDecoder.recycle();
             mBmDecoder = null;
         }
 
+        if(mBitmapGrid != null) {
+            recycleAll();
+        }
+
         mBitmapConfig = config == null ? Bitmap.Config.RGB_565 : config;
 
-        if(mLoadingThread.getState() == Thread.State.NEW) {
+        if(mLoadingThread == null || mLoadingThread.getState() == Thread.State.NEW) {
+            mLoadingThread = new HandlerThread(THREAD_TAG + this.hashCode());
             mLoadingThread.start();
         }
         mLoadingHandler = new Handler(mLoadingThread.getLooper());
@@ -837,7 +844,7 @@ public class PhotoViewAttacher implements IViewAttacher{
             if (mSrcBitmap != null) {
                 return Bitmap.createBitmap(mSrcBitmap, rect.left, rect.top, rect.width(), rect.height());
             }
-            else if (mBmDecoder != null) {
+            else if (mBmDecoder != null && !mBmDecoder.isRecycled()) {
                 BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
                 tmpOptions.inPreferredConfig = mBitmapConfig;
                 tmpOptions.inSampleSize = sampleSize;
