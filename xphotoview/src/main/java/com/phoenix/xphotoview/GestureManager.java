@@ -38,8 +38,8 @@ public class GestureManager extends
         mGestureDetector = new XGestureDetector(context, this);
     }
 
-    public void onTouchEvent(MotionEvent event) {
-        mGestureDetector.onTouchEvent(event);
+    public boolean onTouchEvent(MotionEvent event) {
+        return mGestureDetector.onTouchEvent(event);
     }
 
 
@@ -63,10 +63,7 @@ public class GestureManager extends
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             stopFling();
-
-            mScaleDetector.onTouchEvent(event);
-
-            return super.onTouchEvent(event);
+            return super.onTouchEvent(event) || mScaleDetector.onTouchEvent(event);
         }
     }
 

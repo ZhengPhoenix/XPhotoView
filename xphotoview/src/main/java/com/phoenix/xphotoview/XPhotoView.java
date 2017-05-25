@@ -59,13 +59,6 @@ public class XPhotoView extends View implements IXphotoView{
             mDefaultDoubleTabScale = DoubleTabScale.valueOf(typedArray.getInt(R.styleable.XPhotoView_scaleType, DoubleTabScale.CENTER_CROP.value));
             typedArray.recycle();
         }
-
-        super.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                return false;
-            }
-        });
     }
 
     public void setScaleEnable(boolean flag) {
@@ -116,7 +109,6 @@ public class XPhotoView extends View implements IXphotoView{
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (sScaleEnable) {
-            mGestureManager.onTouchEvent(event);
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (mPhotoAttacher != null && !mPhotoAttacher.isNotAvailable()) {
@@ -133,7 +125,7 @@ public class XPhotoView extends View implements IXphotoView{
             }
         }
 
-        return super.dispatchTouchEvent(event);
+        return mGestureManager.onTouchEvent(event);
     }
 
     @Override
