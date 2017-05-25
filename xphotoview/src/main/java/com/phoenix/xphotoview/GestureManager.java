@@ -63,7 +63,9 @@ public class GestureManager extends
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             stopFling();
-            return super.onTouchEvent(event) || mScaleDetector.onTouchEvent(event);
+            boolean scaleResult = mScaleDetector.onTouchEvent(event);
+            boolean gestureRecult = super.onTouchEvent(event);
+            return scaleResult || gestureRecult;
         }
     }
 
