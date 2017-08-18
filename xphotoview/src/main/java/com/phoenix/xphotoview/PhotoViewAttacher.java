@@ -12,7 +12,6 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.io.File;
@@ -45,6 +44,8 @@ public class PhotoViewAttacher implements IViewAttacher{
 
     private static final float MAX_SCALE_VALUE = 4;
     private static final float MIN_SCALE_VALUE = 1;
+
+    private static final float DOUBLE_TAP_MAX = 2.0f;
 
     private XPhotoView mPhotoView;
 
@@ -230,7 +231,7 @@ public class PhotoViewAttacher implements IViewAttacher{
     {
         mDecodeInputStream = is;
         if (is == null) {
-            onSetImageFinished(true);
+            onSetImageFinished(false);
             return;
         }
 
@@ -258,19 +259,24 @@ public class PhotoViewAttacher implements IViewAttacher{
         /** 以 view 宽/长比例和 image 宽/长比例做比较
          *  iW/iH < vW/vH : 左右留空，取高比值
          *  iW/iH > vW/vH : 上下留空，取宽比值 */
-        float ratio = (imgWidth/imgHeight < viewWidth/viewHeight) ? (imgHeight / viewHeight) : (imgWidth / viewWidth);
-        ratio = ratio < 1 ? 1f : ratio;
+        float ratio = (imgWidth/imgHeight < viewWidth/viewHeight) ? (imgHeight * 1.0f / viewHeight) : (imgWidth * 1.0f / viewWidth);
+        //取消设置ratio最小值，初始化以最大适配view计算ratio
+//        ratio = ratio < 1 ? 1f : ratio;
 
         mShowBitmapRect.set(0, 0, (int) (imgWidth / ratio), (int) (imgHeight / ratio));
 
         /** 保存初始大小 */
         mShowBitmapRect.round(mInitiatedShowBitmapRect);
 
-        /** 取缩小到适配view时的bitmap的正中间 */
+        /** 取缩小到适配view时的bitmap的起始位置 */
         int left = (int) ((mShowBitmapRect.width() - mViewRect.width()) / 2);
-        int right = left + mViewRect.width();
         int top = (int) ((mShowBitmapRect.height() - mViewRect.height()) / 2);
+
+        left = mShowBitmapRect.width() < mViewRect.width() ? left : 0;
+        int right = left + mViewRect.width();
+        top = mShowBitmapRect.height() < mViewRect.height() ? top : 0;
         int bottom = top + mViewRect.height();
+
         mViewBitmapRect.set(left, top, right, bottom);
 
         mSampleSize = (imgWidth/imgHeight < viewWidth/viewHeight) ? calculateSampleSize((int) (imgWidth / mShowBitmapRect.width()))
@@ -346,6 +352,10 @@ public class PhotoViewAttacher implements IViewAttacher{
         float vh = mViewRect.height();
 
         return Math.min(vw / iw, vh / ih);
+    }
+
+    private float getMaxDoubleTapScaleFactor() {
+        return getMaxFitViewScaleFactor() == 1.0f ? DOUBLE_TAP_MAX : getMaxFitViewScaleFactor();
     }
 
     /**
@@ -727,7 +737,7 @@ public class PhotoViewAttacher implements IViewAttacher{
         int tw = mInitiatedShowBitmapRect.width();
         int th = mInitiatedShowBitmapRect.height();
 
-        float maxFitScale = getMaxFitViewScaleFactor();
+        float maxFitScale = getMaxDoubleTapScaleFactor();
         float minFitScale = getMinFitViewScaleFactor();
 
         IXphotoView.DoubleTabScale scale = mPhotoView.getDoubleTabScale();
@@ -822,7 +832,10 @@ public class PhotoViewAttacher implements IViewAttacher{
 
     @Override
     public void destroy() {
-        mLoadingThread.quit();
+        if(mLoadingThread != null) {
+            mLoadingThread.quit();
+        }
+        mLoadingThread = null;
         if (mCacheFile != null) {
             mCacheFile.delete(); // 删除临时文件
         }
@@ -842,7 +855,12 @@ public class PhotoViewAttacher implements IViewAttacher{
 
         synchronized (mDecodeSyncLock) {
             if (mSrcBitmap != null) {
-                return Bitmap.createBitmap(mSrcBitmap, rect.left, rect.top, rect.width(), rect.height());
+                try {
+                    return Bitmap.createBitmap(mSrcBitmap, rect.left, rect.top, rect.width(), rect.height());
+                } catch (OutOfMemoryError exp) {
+                    mPhotoView.onSetImageFinished(null, false, null);
+                    return null;
+                }
             }
             else if (mBmDecoder != null && !mBmDecoder.isRecycled()) {
                 BitmapFactory.Options tmpOptions = new BitmapFactory.Options();

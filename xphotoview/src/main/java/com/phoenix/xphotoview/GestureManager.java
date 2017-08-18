@@ -78,6 +78,10 @@ public class GestureManager extends
         if (DEBUG) {
             Log.e(TAG, "On Tapped: X: " + x + " Y: " + y + " Is: " + (mBM != null && mBM.isTapOnImage(x, y)));
         }
+
+        if(mXImageView != null) {
+            mXImageView.onSingleTab();
+        }
         return true;
     }
 
@@ -101,7 +105,9 @@ public class GestureManager extends
 
     @Override
     public void onLongPress(MotionEvent e) {
-        return;
+        if(mXImageView != null) {
+            mXImageView.onLongTab();
+        }
     }
 
     /*************************************滑动****************************************/

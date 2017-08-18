@@ -32,6 +32,15 @@ public interface IXphotoView {
         }
     }
 
+    interface OnTabListener {
+        void onSingleTab();
+        void onLongTab();
+    }
+
+    void onSingleTab();
+
+    void onLongTab();
+
     DoubleTabScale getDoubleTabScale();
 
     String getCachedDir();
@@ -43,4 +52,6 @@ public interface IXphotoView {
     void onSetImageFinished(IViewAttacher bm, boolean success, Rect image);
 
     void interceptParentTouchEvent(boolean intercept);
+
+    void recycleAll();
 }
