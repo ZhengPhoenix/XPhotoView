@@ -76,3 +76,4 @@ public class PhotoViewInterface {
         void onSingleTap(float cx, float cy);
     }
 }
+

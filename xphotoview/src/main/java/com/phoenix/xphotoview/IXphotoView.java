@@ -55,3 +55,4 @@ public interface IXphotoView {
 
     void recycleAll();
 }
+

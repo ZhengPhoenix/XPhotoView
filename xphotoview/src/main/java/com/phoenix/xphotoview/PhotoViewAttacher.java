@@ -856,6 +856,7 @@ public class PhotoViewAttacher implements IViewAttacher{
         synchronized (mDecodeSyncLock) {
             if (mSrcBitmap != null) {
                 try {
+                    checkRectSize(rect);
                     return Bitmap.createBitmap(mSrcBitmap, rect.left, rect.top, rect.width(), rect.height());
                 } catch (OutOfMemoryError exp) {
                     mPhotoView.onSetImageFinished(null, false, null);
@@ -873,6 +874,16 @@ public class PhotoViewAttacher implements IViewAttacher{
         }
 
         return null;
+    }
+
+    private void checkRectSize(Rect rect) {
+        if(rect.right > mSrcBitmap.getWidth()) {
+            rect.right -= rect.right - mSrcBitmap.getWidth();
+        }
+
+        if(rect.bottom > mSrcBitmap.getHeight()) {
+            rect.bottom -= rect.bottom - mSrcBitmap.getHeight();
+        }
     }
 
     /**

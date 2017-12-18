@@ -103,6 +103,9 @@ public class XPhotoView extends ImageView implements IXphotoView{
 
     /** 设置图片的主入口 */
     public void setImage(Bitmap image) {
+        if(sGif) {
+            return;
+        }
         super.setImageBitmap(image);
         if(mListener != null) {
             mListener.onImageLoadStart(this);
@@ -147,8 +150,16 @@ public class XPhotoView extends ImageView implements IXphotoView{
         }
     }
 
+    public void setImage(InputStream ios) {
+        this.setImageAsStream(ios);
+    }
+
     /** 设置图片的主入口 */
     public void setImage(FileInputStream ios) {
+        this.setImageAsStream(ios);
+    }
+
+    private void setImageAsStream(InputStream ios) {
         if(mListener != null) {
             mListener.onImageLoadStart(this);
             Log.d(TAG, "setImage: time: " + System.currentTimeMillis());
@@ -197,6 +208,12 @@ public class XPhotoView extends ImageView implements IXphotoView{
     }
 
     @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        super.setImageDrawable(drawable);
+        onSetImageFinished(null, true, null);
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (sScaleEnable) {
             switch (event.getAction()) {
@@ -237,7 +254,7 @@ public class XPhotoView extends ImageView implements IXphotoView{
         super.onDraw(canvas);
         if(sGif && mMovie != null) {
             onGifDraw(canvas);
-        } else {
+        } else if(!sGif){
             mPhotoAttacher.draw(canvas, getWidth(), getHeight());
         }
     }
@@ -328,5 +345,9 @@ public class XPhotoView extends ImageView implements IXphotoView{
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(intercept);
         }
+    }
+
+    public void setGif(boolean sGif) {
+        this.sGif = sGif;
     }
 }

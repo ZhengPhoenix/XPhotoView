@@ -240,3 +240,4 @@ public class GestureManager extends
         return mFlingFriction * mPhysicalCoeff * Math.exp(DECELERATION_RATE / decelMinusOne * l);
     }
 }
+

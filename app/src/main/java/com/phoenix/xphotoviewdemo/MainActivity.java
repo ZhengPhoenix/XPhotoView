@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity
         try {
             switch (pos % 6) {
                 case 0:
-                    imageView.setImage(getAssets().open("a.jpg"));
+                    imageView.setGif(true);
+                    imageView.setImage(getAssets().open("ninjia.gif"));
                     break;
 
                 case 1:
@@ -79,16 +80,17 @@ public class MainActivity extends AppCompatActivity
                     break;
 
                 case 2:
-                    imageView.setImage(new File(Environment.getExternalStorageDirectory(), "Manor.jpg"));
+                    imageView.setImage(getAssets().open("b.jpg"));
                     break;
 
                 case 3:
-                    imageView.setImage(getAssets().open("c.jpg"));
+                    imageView.setGif(true);
+                    imageView.setImage(getAssets().open("pikacu.gif"));
                     break;
 
                 case 4:
 //                    imageView.setDoubleTapScaleType(XPhotoView.TYPE_FIT.FIT_IMAGE);
-                    imageView.setImage(getAssets().open("d.jpg"));
+                    imageView.setImage(getAssets().open("c.jpg"));
                     break;
 
                 case 5:
